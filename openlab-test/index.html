@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h2>Kết quả</h2>
+    <p>F12 để xem kết quả của consoleLog</p>
+    <script>
+      const API_URLS = {
+        users: "https://jsonplaceholder.typicode.com/users",
+        posts: "https://jsonplaceholder.typicode.com/posts",
+      };
+      // CÂU 1
+      const students = [
+        { id: 1, name: "An", score: 8 },
+        { id: 2, name: "Binh", score: 6 },
+        { id: 3, name: "Chi", score: 9 },
+        { id: 4, name: "Dung", score: 5 },
+      ];
+      const getExcellentStudents = (studentsData) => {
+        return studentsData
+          .filter((student) => student.score >= 8)
+          .sort((a, b) => b.score - a.score)
+          .map((student) => ({ name: student.name, score: student.score }));
+      };
+      console.log("Câu 1");
+      console.log(getExcellentStudents(students));
+      // CÂU 2
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch(API_URLS.users);
+          if (!response.ok) {
+            throw new Error(`HTTP lỗi! status: ${response.status}`);
+          }
+          const data = await response.json();
+          const formattedData = data.map((user) => ({
+            name: user.name,
+            email: user.email,
+            "company.name": user.company.name,
+          }));
+          console.log("Câu 2");
+          console.log(formattedData);
+          return formattedData;
+        } catch (error) {
+          console.error("Lỗi khi fetch dữ liệu Câu 2:", error);
+        }
+      };
+      fetchUserData();
+      // CÂU 3
+      const orders = [
+        { id: 1, price: 100 },
+        { id: 2, price: 200 },
+        { id: 3, price: 150 },
+      ];
+      const calculateOrderStats = (ordersData) => {
+        if (ordersData.length === 0) return { total: 0, average: 0 };
+        const total = ordersData.reduce((sum, order) => sum + order.price, 0);
+        const average = total / ordersData.length;
+        return { total, average };
+      };
+      console.log("Câu 3");
+      console.log(calculateOrderStats(orders));
+    </script>
+    <hr />
+    <h2>Phần 2: DS BÀI VIẾT</h2>
+    <div id="posts-container"></div>
+    <p id="loading-text" style="display: none; color: blue">
+      Đang tải dữ liệu ...
+    </p>
+    <button id="load-more-btn" style="padding: 10px 20px; cursor: pointer">
+      Load More
+    </button>
+    <script>
+      let currentPage = 1;
+      const limit = 10;
+      const postsContainer = document.getElementById("posts-container");
+      const loadMoreBtn = document.getElementById("load-more-btn");
+      const loadingText = document.getElementById("loading-text");
+      const fetchPosts = async (page) => {
+        try {
+          loadingText.style.display = "block";
+          loadMoreBtn.disabled = true;
+          const response = await fetch(
+            `${API_URLS.posts}?_page=${page}&_limit=${limit}`,
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP lỗi! status: ${response.status}`);
+          }
+          const posts = await response.json();
+          renderPosts(posts);
+        } catch (error) {
+          console.error("Lỗi khi tải bài viết:", error);
+          loadingText.textContent = "Có lỗi xảy ra khi tải dữ liệu bài viết.";
+          loadingText.style.color = "red";
+        } finally {
+          loadingText.style.display = "none";
+          loadMoreBtn.disabled = false;
+        }
+      };
+      const renderPosts = (posts) => {
+        if (posts.length === 0) {
+          loadMoreBtn.style.display = "none";
+          const endMssg = document.createElement("p");
+          endMssg.textContent = "Đã hiển thị bài viết.";
+          postsContainer.appendChild(endMssg);
+          return;
+        }
+        posts.forEach((post) => {
+          const postElement = document.createElement("div");
+          postElement.style.border = "1px solid #ddd";
+          postElement.style.padding = "15px";
+          postElement.style.marginBottom = "15px";
+          postElement.style.borderRadius = "5px";
+          postElement.innerHTML = `
+            <h3 style="margin-top: 0; color: #333;">Post ${post.id}</h3>
+            <p style="margin: 5px 0;"><strong>Title:</strong> ${post.title}</p>
+            <p style="margin: 5px 0;"><strong>Body:</strong> ${post.body}</p>
+          `;
+          postsContainer.appendChild(postElement);
+        });
+      };
+      loadMoreBtn.addEventListener("click", () => {
+        currentPage++;
+        fetchPosts(currentPage);
+      });
+      fetchPosts(currentPage);
+    </script>
+  </body>
+  <hr />
+  <h2>Phần 3: DANH SÁCH NGƯỜI DÙNG</h2>
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th,
+    td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    @media screen and (max-width: 600px) {
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr {
+        display: block;
+      }
+      thead tr {
+        display: none;
+      }
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+      }
+      td:last-child {
+        border-bottom: none;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        font-weight: bold;
+        white-space: nowrap;
+      }
+    }
+  </style>
+  <div style="margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap">
+    <div>
+      <label for="search-name"><strong>Tìm kiếm:</strong></label>
+      <input
+        type="text"
+        id="search-name"
+        placeholder="Nhập tên user..."
+        style="padding: 8px; width: 200px"
+      />
+    </div>
+    <div>
+      <label for="filter-company"><strong>Lọc theo công ty:</strong></label>
+      <select id="filter-company" style="padding: 8px; width: 200px">
+        <option value="">Tất cả công ty</option>
+      </select>
+    </div>
+  </div>
+  <table id="user-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Company</th>
+      </tr>
+    </thead>
+    <tbody id="user-table-body"></tbody>
+  </table>
+  <script>
+    let allUsers = [];
+    const tableBody = document.getElementById("user-table-body");
+    const searchInput = document.getElementById("search-name");
+    const filterCompany = document.getElementById("filter-company");
+    const fetchUsersForTable = async () => {
+      try {
+        const response = await fetch(API_URLS.users);
+        if (!response.ok) throw new Error("Lỗi tải dữ liệu");
+        allUsers = await response.json();
+        renderUserTable(allUsers);
+        populateCompanyFilter(allUsers);
+      } catch (error) {
+        console.error(error);
+        tableBody.innerHTML = `<tr><td colspan="3" style="color:red; text-align:center;">Lỗi tải dữ liệu!</td></tr>`;
+      }
+    };
+    const renderUserTable = (users) => {
+      tableBody.innerHTML = "";
+      if (users.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;">Không tìm thấy kết quả.</td></tr>`;
+        return;
+      }
+      users.forEach((user) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td data-label="Name">${user.name}</td>
+            <td data-label="Email">${user.email}</td>
+            <td data-label="Company">${user.company.name}</td>
+          `;
+        tableBody.appendChild(tr);
+      });
+    };
+    const populateCompanyFilter = (users) => {
+      const companies = [...new Set(users.map((u) => u.company.name))];
+      companies.forEach((companyName) => {
+        const option = document.createElement("option");
+        option.value = companyName;
+        option.textContent = companyName;
+        filterCompany.appendChild(option);
+      });
+    };
+
+    const handleSearchAndFilter = () => {
+      const searchText = searchInput.value.toLowerCase().trim();
+      const selectedCompany = filterCompany.value;
+
+      const filteredUsers = allUsers.filter((user) => {
+        const matchName = user.name.toLowerCase().includes(searchText);
+        const matchCompany =
+          selectedCompany === "" || user.company.name === selectedCompany;
+        return matchName && matchCompany;
+      });
+      renderUserTable(filteredUsers);
+    };
+
+    searchInput.addEventListener("input", handleSearchAndFilter);
+    filterCompany.addEventListener("change", handleSearchAndFilter);
+
+    fetchUsersForTable();
+  </script>
+</html>
